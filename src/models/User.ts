@@ -5,6 +5,8 @@ export interface IUser {
   username: string;
   email: string;
   passwordHash: string;
+  avatarSeed: string;
+  avatarStyle: string;
   bio?: string;
   college?: string;
   role: "STUDENT" | "ADMIN";
@@ -35,6 +37,24 @@ const UserSchema = new Schema<IUser>(
     // The field name makes that explicit so nobody accidentally logs/returns
     // this thinking it's the plaintext password.
     passwordHash: { type: String, required: true, select: false },
+    avatarSeed: {
+    type: String,
+    required: true,
+    },
+    avatarStyle: {
+  type: String,
+  default: "identicon",
+  enum: [
+    "identicon",
+    "adventurer",
+    "bottts",
+    "fun-emoji",
+    "lorelei",
+    "notionists",
+  ],
+    default: "identicon",
+
+},
     bio: { type: String, maxlength: 300, default: "" },
     college: { type: String, maxlength: 120, default: "" },
     role: { type: String, enum: ["STUDENT", "ADMIN"], default: "STUDENT" },

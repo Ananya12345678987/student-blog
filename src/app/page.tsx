@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
+import UserAvatar from "@/components/UserAvatar";
 
 export const dynamic = "force-dynamic"; // always show latest posts, not a stale build-time snapshot
 
@@ -19,6 +20,7 @@ export default async function HomePage() {
 
   return (
     <div>
+
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-indigo-950 tracking-tight">
           Stories from students, for students.

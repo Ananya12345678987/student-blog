@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
@@ -40,13 +41,16 @@ export async function POST(req: NextRequest) {
     // native build step, which matters a lot for a fast, free, portable
     // deploy — a reasonable trade-off for this project's scale.)
     const passwordHash = await bcrypt.hash(password, 12);
+    const avatarSeed = crypto.randomBytes(16).toString("hex");
 
-    const user = await User.create({
-      name,
-      username,
-      email,
-      passwordHash,
-    });
+   const user = await User.create({
+   name,
+   username,
+   email,
+   passwordHash,
+   avatarSeed,
+   avatarStyle: "identicon",
+  });
 
     return NextResponse.json(
       { id: user._id, username: user.username, name: user.name },

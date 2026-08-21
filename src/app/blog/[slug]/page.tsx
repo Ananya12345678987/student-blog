@@ -12,7 +12,8 @@ async function getPost(slug: string) {
     { slug, status: "PUBLISHED" }, // the status filter here is what prevents a
     // guessed/leaked slug from exposing someone's unpublished draft
     { $inc: { views: 1 } },
-    { new: true }
+    { returnDocument: "after" }
+
   )
     .populate("author", "name username college")
     .lean();

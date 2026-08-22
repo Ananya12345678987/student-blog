@@ -16,8 +16,17 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(20, Number(searchParams.get("limit")) || 10); // hard cap: never let a client request an unbounded page size
   const category = searchParams.get("category");
 
+   const q = searchParams.get("q");
+
   const filter: Record<string, unknown> = { status: "PUBLISHED" };
   if (category) filter.category = category;
+  if (q) {
+    filter.$or = [
+      { title: { $regex: q, $options: "i" } },
+      { excerpt: { $regex: q, $options: "i" } },
+      { content: { $regex: q, $options: "i" } },
+    ];
+  }
 
   const [posts, total] = await Promise.all([
     Post.find(filter)

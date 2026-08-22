@@ -11,6 +11,8 @@ export interface IUser {
   college?: string;
   role: "STUDENT" | "ADMIN";
   createdAt: Date;
+  resetToken?: string;
+  resetTokenExpiry?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -52,12 +54,15 @@ const UserSchema = new Schema<IUser>(
     "lorelei",
     "notionists",
   ],
-    default: "identicon",
-
 },
+  
     bio: { type: String, maxlength: 300, default: "" },
     college: { type: String, maxlength: 120, default: "" },
     role: { type: String, enum: ["STUDENT", "ADMIN"], default: "STUDENT" },
+    // Hashed reset token + expiry for the forgot-password flow. Never
+    // store the raw token — only its hash, same principle as passwordHash.
+    resetToken: { type: String, select: false },
+    resetTokenExpiry: { type: Date, select: false },
   },
   { timestamps: true }
 );

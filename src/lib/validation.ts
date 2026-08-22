@@ -38,6 +38,7 @@ export const postCreateSchema = z.object({
   title: z.string().trim().min(3).max(200),
   excerpt: z.string().trim().max(300).optional(),
   content: z.string().trim().min(10),
+  coverImage: z.string().trim().url("Must be a valid URL").max(500).optional().or(z.literal("")),
   category: z.string().trim().max(60).optional(),
   tags: z.array(z.string().trim().max(30)).max(10).optional(),
   status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
@@ -47,6 +48,20 @@ export const postUpdateSchema = postCreateSchema.partial();
 
 export const commentCreateSchema = z.object({
   content: z.string().trim().min(1).max(1000),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(72, "Password too long")
+    .regex(/[A-Za-z]/, "Password must contain a letter")
+    .regex(/[0-9]/, "Password must contain a number"),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

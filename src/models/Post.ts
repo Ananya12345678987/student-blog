@@ -1,4 +1,6 @@
 import { Schema, models, model, Types } from "mongoose";
+import "@/models/User";
+
 
 export interface IPost {
   title: string;

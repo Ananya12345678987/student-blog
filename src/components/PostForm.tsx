@@ -7,6 +7,7 @@ type PostFormValues = {
   title: string;
   excerpt: string;
   content: string;
+  coverImage: string;
   category: string;
   tags: string; // comma-separated in the form, split into an array on submit
 };
@@ -31,10 +32,11 @@ export default function PostForm({
   initialValues?: Partial<PostFormValues>;
 }) {
   const router = useRouter();
-  const [values, setValues] = useState<PostFormValues>({
+    const [values, setValues] = useState<PostFormValues>({
     title: initialValues?.title ?? "",
     excerpt: initialValues?.excerpt ?? "",
     content: initialValues?.content ?? "",
+    coverImage: initialValues?.coverImage ?? "",
     category: initialValues?.category ?? "Programming",
     tags: initialValues?.tags ?? "",
   });
@@ -45,10 +47,11 @@ export default function PostForm({
     setError(null);
     setSaving(status);
 
-    const payload = {
+       const payload = {
       title: values.title,
       excerpt: values.excerpt,
       content: values.content,
+      coverImage: values.coverImage,
       category: values.category,
       tags: values.tags
         .split(",")
@@ -85,13 +88,30 @@ export default function PostForm({
         maxLength={200}
       />
 
-      <input
+            <input
         placeholder="Short excerpt (shown in the feed)"
         value={values.excerpt}
         onChange={(e) => setValues({ ...values, excerpt: e.target.value })}
         className="input"
         maxLength={300}
       />
+
+      <input
+        placeholder="Cover image URL (optional)"
+        value={values.coverImage}
+        onChange={(e) => setValues({ ...values, coverImage: e.target.value })}
+        className="input"
+        maxLength={500}
+      />
+
+      {values.coverImage && (
+        <img
+          src={values.coverImage}
+          alt="Cover preview"
+          className="w-full max-h-64 object-cover rounded-lg border border-neutral-200"
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <select

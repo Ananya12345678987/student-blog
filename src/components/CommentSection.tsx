@@ -7,7 +7,7 @@ import Link from "next/link";
 type Comment = {
   _id: string;
   content: string;
-  author: { name: string; username: string };
+  author: { _id: string; name: string; username: string };
   createdAt: string;
 };
 
@@ -43,12 +43,26 @@ export default function CommentSection({ postId }: { postId: string }) {
       // Optimistically show it with the current user's name rather than
       // re-fetching the whole list.
       setComments((prev) => [
-        { ...newComment, author: { name: session?.user?.name, username: (session?.user as any)?.username } },
-        ...prev,
-      ]);
+  { ...newComment, author: { _id: (session?.user as any)?.id, name: session?.user?.name, username: (session?.user as any)?.username } },
+  ...prev,
+]);
       setText("");
     }
     setPosting(false);
+  }
+  async function handleDelete(commentId: string) {
+    const confirmed = window.confirm("Delete this comment?");
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/comments/${commentId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+    } else {
+      alert("Failed to delete comment.");
+    }
   }
 
   return (
@@ -89,16 +103,27 @@ export default function CommentSection({ postId }: { postId: string }) {
       ) : comments.length === 0 ? (
         <p className="text-sm text-neutral-400">No comments yet.</p>
       ) : (
-        <ul className="space-y-4">
+                <ul className="space-y-4">
           {comments.map((c) => (
             <li key={c._id} className="border-b border-neutral-100 pb-3">
               {/* content is rendered as plain text (React escapes it by
                   default) — never dangerouslySetInnerHTML — so there is no
                   HTML/script injection path through comments */}
               <p className="text-sm text-neutral-800">{c.content}</p>
-              <p className="text-xs text-neutral-400 mt-1">
-                {c.author?.name} · {new Date(c.createdAt).toLocaleDateString()}
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-neutral-400">
+                  {c.author?.name} · {new Date(c.createdAt).toLocaleDateString()}
+                </p>
+                {(session?.user as any)?.id === c.author?._id && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(c._id)}
+                    className="text-xs text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>

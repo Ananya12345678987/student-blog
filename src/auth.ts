@@ -43,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           username: user.username,
           avatarSeed: user.avatarSeed,
+          avatarStyle: user.avatarStyle,   // ADD THIS LINE
           role: user.role,
         };
       },
@@ -50,13 +51,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     // Copy id/username/role onto the JWT at login time...
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.username = (user as any).username;
         token.avatarSeed = (user as any).avatarSeed;
+        token.avatarStyle = (user as any).avatarStyle;   // ADD THIS LINE        
         token.role = (user as any).role;
-      }
+      }else if (trigger === "update" && session) {
+    // Called when the client does useSession().update(newData) —
+    // merge the fresh fields into the token without a full re-login.
+    if (session.name) token.name = session.name;
+    if (session.avatarStyle) token.avatarStyle = session.avatarStyle;
+  }
+
       return token;
     },
     // ...and expose them on the session object so server components and
@@ -66,7 +74,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as any).id = token.id;
         (session.user as any).username = token.username;
         (session.user as any).avatarSeed = token.avatarSeed;
+        (session.user as any).avatarStyle = token.avatarStyle;   // ADD THIS LINE
         (session.user as any).role = token.role;
+        if (token.name) session.user.name = token.name as string;
+
       }
       return session;
     },

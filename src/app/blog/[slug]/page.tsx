@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import MarkdownContent from "@/components/MarkdownContent";
 import CommentSection from "@/components/CommentSection";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +29,22 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   return (
     <article>
       <p className="text-sm text-indigo-600 font-medium">{post.category}</p>
-      <h1 className="text-3xl font-semibold text-neutral-900 mt-1">{post.title}</h1>
+            <h1 className="text-3xl font-semibold text-neutral-900 mt-1">{post.title}</h1>
+
+      {post.coverImage && (
+        <img
+          src={post.coverImage}
+          alt=""
+          className="w-full max-h-96 object-cover rounded-lg mt-4"
+        />
+      )}
       <p className="text-sm text-neutral-400 mt-2">
-        {post.author?.name} {post.author?.college ? `· ${post.author.college}` : ""} ·{" "}
-        {new Date(post.publishedAt).toLocaleDateString()}
-      </p>
+  <Link href={`/profile/${post.author?.username}`} className="hover:text-indigo-700 hover:underline">
+    {post.author?.name}
+  </Link>{" "}
+  {post.author?.college ? `· ${post.author.college}` : ""} ·{" "}
+  {new Date(post.publishedAt).toLocaleDateString()}
+</p>
 
       <div className="mt-6">
         <MarkdownContent content={post.content} />

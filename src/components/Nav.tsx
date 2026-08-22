@@ -48,6 +48,7 @@ export default function Nav() {
                     seed={
                       session.user.avatarSeed || session.user.username
                     }
+                      style={(session.user as any).avatarStyle || "identicon"}
                     size={36}
                   />
                 </button>

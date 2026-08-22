@@ -40,7 +40,7 @@ function LoginForm() {
       <h1 className="text-2xl font-semibold text-indigo-950 mb-1">Welcome back</h1>
       <p className="text-sm text-neutral-500 mb-6">Log in to write and manage your posts.</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           <span className="block text-sm font-medium text-neutral-800 mb-1">Email</span>
           <input
@@ -65,8 +65,15 @@ function LoginForm() {
           />
         </label>
 
+        <p className="text-right">
+          <Link href="/forgot-password" className="text-xs text-indigo-700 hover:underline">
+            Forgot password?
+          </Link>
+        </p>
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
+  
         <button
           type="submit"
           disabled={loading}

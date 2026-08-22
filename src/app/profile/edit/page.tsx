@@ -16,7 +16,8 @@ const avatarStyles = [
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  
 
   const [name, setName] = useState("");
   const [college, setCollege] = useState("");
@@ -106,13 +107,20 @@ export default function EditProfilePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to update profile.");
-        setSaving(false);
-        return;
-      }
+  setError(data.error || "Failed to update profile.");
+  setSaving(false);
+  return;
+}
 
-      router.push("/profile");
-      router.refresh();
+// Push the updated fields into the JWT immediately, so the navbar
+// avatar/name reflect the change without needing a logout/login.
+await update({
+  name: data.user.name,
+  avatarStyle: data.user.avatarStyle,
+});
+
+router.push("/profile");
+router.refresh();
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");

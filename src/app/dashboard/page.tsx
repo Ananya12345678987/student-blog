@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
+import DeletePostButton from "@/components/DeletePostButton";
 
 export const dynamic = "force-dynamic";
 
@@ -55,12 +56,18 @@ export default async function DashboardPage() {
                   · Updated {new Date(post.updatedAt).toLocaleDateString()}
                 </p>
               </div>
-              <Link
-                href={`/dashboard/posts/${post._id}/edit`}
-                className="text-sm text-indigo-700 hover:underline"
-              >
-                Edit
-              </Link>
+                            <div className="flex items-center gap-3">
+                <Link
+                  href={`/dashboard/posts/${post._id}/edit`}
+                  className="text-sm text-indigo-700 hover:underline"
+                >
+                  Edit
+                </Link>
+                <DeletePostButton
+                  postId={post._id.toString()}
+                  postTitle={post.title}
+                />
+              </div>
             </li>
           ))}
         </ul>

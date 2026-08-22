@@ -3,9 +3,14 @@ import { auth } from "@/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 
+// GET /api/profile
+// Fetch the currently logged-in user's profile
 export async function GET() {
   try {
     const session = await auth();
+
+    console.log("PROFILE SESSION:", session);
+    console.log("PROFILE USER ID:", session?.user?.id);
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -16,28 +21,18 @@ export async function GET() {
 
     await connectDB();
 
-    
-    const user = await User.findByIdAndUpdate(
-  session.user.id,
-  {
-    $set: {
-      name,
-      college,
-      bio,
-      avatarStyle,
-    },
-  },
-  {
-    returnDocument: "after",
-    runValidators: true,
-  }
-)
-  .select("name username avatarSeed avatarStyle bio college role")
-  .lean();
+    const user = await User.findById(session.user.id)
+    .select("name username avatarSeed avatarStyle bio college role")  
+    .lean();
+
+    console.log("PROFILE USER FROM DB:", user);
 
     if (!user) {
       return NextResponse.json(
-        { error: "User not found" },
+        {
+          error: "User not found",
+          sessionUserId: session.user.id,
+        },
         { status: 404 }
       );
     }
@@ -53,6 +48,8 @@ export async function GET() {
   }
 }
 
+// PATCH /api/profile
+// Update the currently logged-in user's profile
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth();
@@ -67,19 +64,26 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
 
     const name =
-      typeof body.name === "string" ? body.name.trim() : "";
+      typeof body.name === "string"
+        ? body.name.trim()
+        : "";
 
     const college =
-      typeof body.college === "string" ? body.college.trim() : "";
+      typeof body.college === "string"
+        ? body.college.trim()
+        : "";
 
     const bio =
-      typeof body.bio === "string" ? body.bio.trim() : "";
+      typeof body.bio === "string"
+        ? body.bio.trim()
+        : "";
 
-      const avatarStyle =
-  typeof body.avatarStyle === "string"
-    ? body.avatarStyle
-    : "identicon";
-    // Basic server-side validation
+    const avatarStyle =
+      typeof body.avatarStyle === "string"
+        ? body.avatarStyle
+        : "identicon";
+
+    // Validation
     if (!name) {
       return NextResponse.json(
         { error: "Name is required" },
@@ -110,24 +114,23 @@ export async function PATCH(req: NextRequest) {
 
     await connectDB();
 
-    const user = await User.findByIdAndUpdate(
-      session.user.id,
-      {
-        $set: {
-          name,
-          college,
-          bio,
-          avatarStyle,
-
-        },
-      },
-      {
-        returnDocument: "after",
-        runValidators: true,
-      }
-    )
-      .select("name username avatarSeed bio college role")
-      .lean();
+   const user = await User.findByIdAndUpdate(
+  session.user.id,
+  {
+    $set: {
+      name,
+      college,
+      bio,
+      avatarStyle,
+    },
+  },
+  {
+    returnDocument: "after",
+    runValidators: true,
+  }
+)
+  .select("name username avatarSeed avatarStyle bio college role")
+  .lean();
 
     if (!user) {
       return NextResponse.json(

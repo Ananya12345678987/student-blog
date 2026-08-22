@@ -31,10 +31,11 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       <h1 className="text-2xl font-semibold text-indigo-950 mb-6">Edit post</h1>
       <PostForm
         postId={id}
-        initialValues={{
+                initialValues={{
           title: (post as any).title,
           excerpt: (post as any).excerpt,
           content: (post as any).content,
+          coverImage: (post as any).coverImage,
           category: (post as any).category,
           tags: ((post as any).tags ?? []).join(", "),
         }}

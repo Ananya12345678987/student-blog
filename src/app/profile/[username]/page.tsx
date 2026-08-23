@@ -5,6 +5,8 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import Post from "@/models/Post";
 import UserAvatar from "@/components/UserAvatar";
+import FollowButton from "@/components/FollowButton";
+
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,8 @@ async function getPublicProfile(username: string) {
 
   if (!user) return null;
 
+  const followerCount = await User.countDocuments({ following: (user as any)._id });
+
   const posts = await Post.find({
     author: (user as any)._id,
     status: "PUBLISHED",
@@ -28,6 +32,7 @@ async function getPublicProfile(username: string) {
   return {
     user: JSON.parse(JSON.stringify(user)),
     posts: JSON.parse(JSON.stringify(posts)),
+    followerCount,
   };
 }
 
@@ -39,11 +44,22 @@ export default async function PublicProfilePage({
   const { username } = await params;
   const session = await auth();
 
-  const profile = await getPublicProfile(username);
+    const profile = await getPublicProfile(username);
   if (!profile) notFound();
 
-  const { user, posts } = profile;
+  const { user, posts, followerCount } = profile;
   const isOwnProfile = (session?.user as any)?.username === user.username;
+
+  let isFollowing = false;
+  if (!isOwnProfile && session?.user) {
+    await connectDB();
+    const currentUser = await User.findById((session.user as any).id)
+      .select("following")
+      .lean();
+    isFollowing = !!(currentUser as any)?.following?.some(
+      (id: any) => id.toString() === user._id
+    );
+  }
 
   return (
     <div className="space-y-10">
@@ -70,16 +86,22 @@ export default async function PublicProfilePage({
           </p>
         )}
 
-        {isOwnProfile && (
-          <div className="mt-5">
+               <div className="mt-5 flex justify-center">
+          {isOwnProfile ? (
             <Link
               href="/profile/edit"
               className="inline-block rounded-md bg-indigo-600 text-white px-4 py-2 text-sm hover:bg-indigo-700"
             >
               Edit Profile
             </Link>
-          </div>
-        )}
+          ) : (
+            <FollowButton
+              username={user.username}
+              initialFollowing={isFollowing}
+              initialFollowerCount={followerCount}
+            />
+          )}
+        </div>
       </section>
 
       <section>

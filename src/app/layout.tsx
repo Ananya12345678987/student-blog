@@ -6,6 +6,11 @@ import Nav from "@/components/Nav";
 export const metadata: Metadata = {
   title: "StudentBlog",
   description: "A blogging platform built by and for students",
+  alternates: {
+    types: {
+      "application/rss+xml": "/rss.xml",
+    },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import ReportButton from "@/components/ReportButton";
 
 type Comment = {
   _id: string;
@@ -110,20 +111,24 @@ export default function CommentSection({ postId }: { postId: string }) {
                   default) — never dangerouslySetInnerHTML — so there is no
                   HTML/script injection path through comments */}
               <p className="text-sm text-neutral-800">{c.content}</p>
-              <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-neutral-400">
                   {c.author?.name} · {new Date(c.createdAt).toLocaleDateString()}
                 </p>
-                {(session?.user as any)?.id === c.author?._id && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(c._id)}
-                    className="text-xs text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
+                <div className="flex items-center gap-3">
+                  {(session?.user as any)?.id === c.author?._id ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c._id)}
+                      className="text-xs text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  ) : (
+                    <ReportButton targetType="COMMENT" targetId={c._id} />
+                  )}
+                </div>
+              </div>              
             </li>
           ))}
         </ul>

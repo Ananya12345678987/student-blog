@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Comment from "@/models/Comment";
+import Post from "@/models/Post";
 import { commentCreateSchema } from "@/lib/validation";
 import { auth } from "@/auth";
+import { createNotification } from "@/lib/notify";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -36,11 +38,21 @@ export async function POST(req: NextRequest, { params }: Params) {
   // content is stored as plain text (maxlength enforced in schema) and
   // rendered as plain text on the frontend — never dangerouslySetInnerHTML
   // — so there's no HTML/XSS injection path through comments at all.
-  const comment = await Comment.create({
+    const comment = await Comment.create({
     post: id,
     author: (session.user as any).id,
     content: parsed.data.content,
   });
+
+  const post = await Post.findById(id).select("author");
+  if (post) {
+    await createNotification({
+      recipientId: post.author.toString(),
+      actorId: (session.user as any).id,
+      type: "COMMENT",
+      postId: id,
+    });
+  }
 
   return NextResponse.json(comment, { status: 201 });
 }

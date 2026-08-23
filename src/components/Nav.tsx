@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import UserAvatar from "@/components/UserAvatar";
+import NotificationBell from "@/components/NotificationBell";
+
 
 export default function Nav() {
   const { data: session, status } = useSession();
@@ -29,12 +31,16 @@ export default function Nav() {
                 Write
               </Link>
 
-              <Link
+                            <Link
                 href="/dashboard"
                 className="text-neutral-700 hover:text-indigo-700"
               >
                 Dashboard
               </Link>
+
+              <NotificationBell />
+
+              {/* Avatar + dropdown */}
 
               {/* Avatar + dropdown */}
               <div className="relative">
@@ -65,7 +71,7 @@ export default function Nav() {
                       </p>
                     </div>
 
-                    <div className="py-1">
+                                      <div className="py-1">
                       <Link
                         href="/profile"
                         onClick={() => setOpen(false)}
@@ -81,7 +87,34 @@ export default function Nav() {
                       >
                         Edit Profile
                       </Link>
-                    </div>
+
+                                            <Link
+                        href="/dashboard/saved"
+                        onClick={() => setOpen(false)}
+                        className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                      >
+                        Saved Posts
+                      </Link>
+
+                                            {(session.user as any).role === "ADMIN" && (
+                        <>
+                          <Link
+                            href="/admin"
+                            onClick={() => setOpen(false)}
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          >
+                            Admin — All Posts
+                          </Link>
+                          <Link
+                            href="/admin/reports"
+                            onClick={() => setOpen(false)}
+                            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          >
+                            Admin — Reports
+                          </Link>
+                        </>
+                      )}
+                    </div>    
 
                     <div className="border-t border-neutral-100 py-1">
                       <button

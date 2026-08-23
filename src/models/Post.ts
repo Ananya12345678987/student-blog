@@ -14,6 +14,7 @@ export interface IPost {
   status: "DRAFT" | "PUBLISHED";
   publishedAt?: Date;
   views: number;
+  likes: Types.ObjectId[]; // user ids who liked this post
 }
 
 const PostSchema = new Schema<IPost>(
@@ -32,6 +33,7 @@ const PostSchema = new Schema<IPost>(
     status: { type: String, enum: ["DRAFT", "PUBLISHED"], default: "DRAFT", index: true },
     publishedAt: { type: Date },
     views: { type: Number, default: 0 },
+    likes: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
   },
   { timestamps: true }
 );

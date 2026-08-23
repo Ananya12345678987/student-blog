@@ -1,4 +1,4 @@
-import mongoose, { Schema, models, model } from "mongoose";
+import mongoose, { Schema, models, model, Types } from "mongoose";
 
 export interface IUser {
   name: string;
@@ -13,6 +13,8 @@ export interface IUser {
   createdAt: Date;
   resetToken?: string;
   resetTokenExpiry?: Date;
+  bookmarks: Types.ObjectId[];
+  following: Types.ObjectId[];
 }
 
 const UserSchema = new Schema<IUser>(
@@ -63,6 +65,8 @@ const UserSchema = new Schema<IUser>(
     // store the raw token — only its hash, same principle as passwordHash.
     resetToken: { type: String, select: false },
     resetTokenExpiry: { type: Date, select: false },
+    bookmarks: { type: [Schema.Types.ObjectId], ref: "Post", default: [] },
+    following: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
   },
   { timestamps: true }
 );

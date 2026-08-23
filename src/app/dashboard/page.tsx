@@ -6,8 +6,9 @@ import DeletePostButton from "@/components/DeletePostButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
-  const session = await auth(); // middleware already guarantees this exists, but
+ export default async function DashboardPage() {
+  const session = await auth();
+ // middleware already guarantees this exists, but
   // never assume — re-checking here means this page is safe even if it's
   // ever reached another way (e.g. middleware config changes later).
   if (!session?.user) return null;

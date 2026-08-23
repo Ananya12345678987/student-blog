@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import MarkdownContent from "@/components/MarkdownContent";
 
 type PostFormValues = {
   title: string;
@@ -40,10 +41,103 @@ export default function PostForm({
     category: initialValues?.category ?? "Programming",
     tags: initialValues?.tags ?? "",
   });
-  const [error, setError] = useState<string | null>(null);
+      const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState<"DRAFT" | "PUBLISHED" | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingInline, setUploadingInline] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+  const inlineFileInputRef = useRef<HTMLInputElement>(null);
+  const [contentTab, setContentTab] = useState<"write" | "preview">("write");
 
-  async function save(status: "DRAFT" | "PUBLISHED") {
+  async function uploadFile(file: File): Promise<string | null> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.error || "Upload failed.");
+      return null;
+    }
+    return data.url as string;
+  }
+
+  async function handleCoverFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow picking the same file again later
+    if (!file) return;
+
+    setUploadingCover(true);
+    const url = await uploadFile(file);
+    setUploadingCover(false);
+
+    if (url) setValues((v) => ({ ...v, coverImage: url }));
+  }
+
+  async function handleInlineFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploadingInline(true);
+    const url = await uploadFile(file);
+    setUploadingInline(false);
+    if (!url) return;
+
+    const alt = window.prompt("Short description (for accessibility):", "") || "image";
+    const snippet = `\n![${alt}](${url})\n`;
+
+    const textarea = contentRef.current;
+    if (!textarea) {
+      setValues((v) => ({ ...v, content: v.content + snippet }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = values.content.slice(0, start);
+    const after = values.content.slice(end);
+    setValues((v) => ({ ...v, content: before + snippet + after }));
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursorPos = start + snippet.length;
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    });
+  }
+  
+  
+  function handleInsertImage() {
+    const url = window.prompt("Image URL:");
+    if (!url) return;
+
+    const alt = window.prompt("Short description (for accessibility):", "") || "image";
+    const snippet = `\n![${alt}](${url})\n`;
+
+    const textarea = contentRef.current;
+    if (!textarea) {
+      setValues((v) => ({ ...v, content: v.content + snippet }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = values.content.slice(0, start);
+    const after = values.content.slice(end);
+    const next = before + snippet + after;
+
+    setValues((v) => ({ ...v, content: next }));
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursorPos = start + snippet.length;
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    });
+  }
+
+    async function save(status: "DRAFT" | "PUBLISHED") {  
     setError(null);
     setSaving(status);
 
@@ -96,15 +190,32 @@ export default function PostForm({
         maxLength={300}
       />
 
-      <input
-        placeholder="Cover image URL (optional)"
-        value={values.coverImage}
-        onChange={(e) => setValues({ ...values, coverImage: e.target.value })}
-        className="input"
-        maxLength={500}
-      />
+              <div className="flex gap-2">
+        <input
+          placeholder="Cover image URL (optional)"
+          value={values.coverImage}
+          onChange={(e) => setValues({ ...values, coverImage: e.target.value })}
+          className="input flex-1"
+          maxLength={500}
+        />
+        <input
+          ref={coverFileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleCoverFileChange}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => coverFileInputRef.current?.click()}
+          disabled={uploadingCover}
+          className="rounded-md border border-neutral-300 px-3 text-sm hover:bg-neutral-50 disabled:opacity-50 whitespace-nowrap"
+        >
+          {uploadingCover ? "Uploading…" : "Upload from computer"}
+        </button>
+      </div>
 
-      {values.coverImage && (
+      {values.coverImage && (    
         <img
           src={values.coverImage}
           alt="Cover preview"
@@ -134,13 +245,77 @@ export default function PostForm({
         />
       </div>
 
-      <textarea
-        placeholder="Write in Markdown… (# headings, **bold**, `code`, ![alt](url) images)"
-        value={values.content}
-        onChange={(e) => setValues({ ...values, content: e.target.value })}
-        rows={16}
-        className="input font-mono text-sm"
-      />
+            <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-neutral-700">Content</span>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleInsertImage}
+            className="text-xs text-indigo-700 hover:underline"
+          >
+            + Insert image (URL)
+          </button>
+          <input
+            ref={inlineFileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleInlineFileChange}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => inlineFileInputRef.current?.click()}
+            disabled={uploadingInline}
+            className="text-xs text-indigo-700 hover:underline disabled:opacity-50"
+          >
+            {uploadingInline ? "Uploading…" : "+ Upload from computer"}
+          </button>
+        </div>
+      </div>      
+
+                <div className="flex gap-1 border-b border-neutral-200">
+        <button
+          type="button"
+          onClick={() => setContentTab("write")}
+          className={`px-3 py-1.5 text-sm border-b-2 -mb-px ${
+            contentTab === "write"
+              ? "border-indigo-600 text-indigo-700 font-medium"
+              : "border-transparent text-neutral-500 hover:text-neutral-700"
+          }`}
+        >
+          Write
+        </button>
+        <button
+          type="button"
+          onClick={() => setContentTab("preview")}
+          className={`px-3 py-1.5 text-sm border-b-2 -mb-px ${
+            contentTab === "preview"
+              ? "border-indigo-600 text-indigo-700 font-medium"
+              : "border-transparent text-neutral-500 hover:text-neutral-700"
+          }`}
+        >
+          Preview
+        </button>
+      </div>
+
+      {contentTab === "write" ? (
+        <textarea
+          ref={contentRef}
+          placeholder="Write your post in Markdown…"
+          value={values.content}
+          onChange={(e) => setValues({ ...values, content: e.target.value })}
+          className="input min-h-[300px] font-mono text-sm"
+          required
+        />
+      ) : (
+        <div className="min-h-[300px] border border-neutral-200 rounded-lg px-4 py-3">
+          {values.content.trim() ? (
+            <MarkdownContent content={values.content} />
+          ) : (
+            <p className="text-neutral-400 text-sm">Nothing to preview yet.</p>
+          )}
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

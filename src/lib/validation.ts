@@ -50,6 +50,12 @@ export const commentCreateSchema = z.object({
   content: z.string().trim().min(1).max(1000),
 });
 
+  export const reportCreateSchema = z.object({
+  targetType: z.enum(["POST", "COMMENT"]),
+  targetId: z.string().min(1),
+  reason: z.string().trim().min(3).max(500),
+});
+
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
 });

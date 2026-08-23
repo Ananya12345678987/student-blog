@@ -18,7 +18,21 @@ const CATEGORIES = [
   "General",
 ];
 
-const PAGE_SIZE = 5;
+  const PAGE_SIZE = 5;
+
+async function getTrendingPosts() {
+  await connectDB();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const posts = await Post.find({
+    status: "PUBLISHED",
+    publishedAt: { $gte: sevenDaysAgo },
+  })
+    .sort({ views: -1 })
+    .limit(5)
+    .select("title slug views")
+    .lean();
+  return JSON.parse(JSON.stringify(posts));
+}
 
 async function getPosts(category?: string, q?: string, page = 1) {
   await connectDB();
@@ -55,12 +69,33 @@ async function getPosts(category?: string, q?: string, page = 1) {
 }: {
   searchParams: Promise<{ category?: string; q?: string; page?: string }>;
 }) {
-  const { category, q, page: pageParam } = await searchParams;
+    const { category, q, page: pageParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const { posts, totalPages } = await getPosts(category, q, page);
+  const trending = await getTrendingPosts();
 
   return (
     <div>
+
+      {trending.length > 0 && !category && !q && page === 1 && (
+        <div className="mb-10 bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+          <h2 className="text-sm font-semibold text-indigo-900 mb-3">🔥 Trending this week</h2>
+          <ul className="space-y-2">
+            {trending.map((t: any, i: number) => (
+              <li key={t._id}>
+                <Link
+                  href={`/blog/${t.slug}`}
+                  className="text-sm text-indigo-800 hover:underline flex items-center gap-2"
+                >
+                  <span className="text-indigo-400 font-medium">{i + 1}.</span>
+                  <span className="flex-1">{t.title}</span>
+                  <span className="text-xs text-indigo-400">{t.views} views</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
             <div className="mb-8">
         <h1 className="text-3xl font-semibold text-indigo-950 tracking-tight">
@@ -128,7 +163,7 @@ async function getPosts(category?: string, q?: string, page = 1) {
                 </h2>
                 {post.excerpt && <p className="text-neutral-500 mt-1">{post.excerpt}</p>}
               </Link>
-              <p className="text-sm text-neutral-400 mt-2">
+                              <p className="text-sm text-neutral-400 mt-2">
               {post.author?.username ? (
                 <Link href={`/profile/${post.author.username}`} className="hover:text-indigo-700 hover:underline">
                   {post.author.name}
@@ -136,7 +171,7 @@ async function getPosts(category?: string, q?: string, page = 1) {
               ) : (
                 "Unknown"
               )}{" "}
-              · {post.category}
+              · {post.category} · {Math.max(1, Math.round((post.content?.trim().split(/\s+/).length || 0) / 200))} min read
 </p>
             </li>
           ))}

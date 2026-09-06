@@ -25,23 +25,25 @@ export default async function SavedPostsPage() {
   
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-indigo-950 mb-6">Saved posts</h1>
+            <h1 className="font-display text-3xl text-ink mb-6 border-b border-rule pb-4">Saved posts</h1>
 
       {posts.length === 0 ? (
-        <div className="border border-dashed border-neutral-300 rounded-lg py-16 text-center text-neutral-400">
+        <div className="border border-dashed border-rule rounded-md py-16 text-center text-ink/40">
           You haven't saved any posts yet.
         </div>
       ) : (
-        <ul className="space-y-6">
-          {posts.map((post: any) => (
-            <li key={post._id} className="border-b border-neutral-200 pb-5">
+        <ul>
+          {posts.map((post: any, i: number) => (
+            <li key={post._id} className={`py-5 ${i > 0 ? "border-t border-rule" : ""}`}>
               <Link href={`/blog/${post.slug}`} className="group">
-                <h2 className="text-lg font-semibold text-neutral-900 group-hover:text-indigo-700">
+                <h2 className="font-display text-lg text-ink group-hover:text-marker-dark transition">
                   {post.title}
                 </h2>
-                {post.excerpt && <p className="text-sm text-neutral-500 mt-1">{post.excerpt}</p>}
+                {post.excerpt && <p className="text-sm text-ink/50 mt-1">{post.excerpt}</p>}
               </Link>
-              <p className="text-xs text-neutral-400 mt-2">
+              <p className="text-xs text-ink/40 mt-2">  
+
+
                 {post.author?.name} · {post.category}
               </p>
             </li>

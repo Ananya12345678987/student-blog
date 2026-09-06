@@ -15,6 +15,9 @@ export interface IUser {
   resetTokenExpiry?: Date;
   bookmarks: Types.ObjectId[];
   following: Types.ObjectId[];
+  emailVerified: boolean;
+  verificationToken?: string;
+  verificationTokenExpiry?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -66,7 +69,10 @@ const UserSchema = new Schema<IUser>(
     resetToken: { type: String, select: false },
     resetTokenExpiry: { type: Date, select: false },
     bookmarks: { type: [Schema.Types.ObjectId], ref: "Post", default: [] },
-    following: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+        following: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    emailVerified: { type: Boolean, default: false },
+    verificationToken: { type: String, select: false },
+    verificationTokenExpiry: { type: Date, select: false },
   },
   { timestamps: true }
 );

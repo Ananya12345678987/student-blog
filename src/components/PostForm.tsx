@@ -148,8 +148,8 @@ export default function PostForm({
       coverImage: values.coverImage,
       category: values.category,
       tags: values.tags
-        .split(",")
-        .map((t) => t.trim())
+        .split(/[,\s]+/)
+        .map((t) => t.trim().replace(/^#+/, ""))
         .filter(Boolean),
       status,
     };

@@ -43,7 +43,7 @@ export default function ReportButton({
   }
 
   if (done) {
-    return <span className="text-xs text-neutral-400">Reported</span>;
+    return <span className="text-xs text-ink/40">Reported</span>;
   }
 
   return (
@@ -51,7 +51,7 @@ export default function ReportButton({
       type="button"
       onClick={handleClick}
       disabled={submitting}
-      className="text-xs text-neutral-400 hover:text-red-600 hover:underline disabled:opacity-50"
+      className="text-xs text-ink/40 hover:text-pen-red hover:underline disabled:opacity-50"
     >
       {submitting ? "Reporting…" : "Report"}
     </button>

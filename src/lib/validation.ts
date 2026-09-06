@@ -48,6 +48,7 @@ export const postUpdateSchema = postCreateSchema.partial();
 
 export const commentCreateSchema = z.object({
   content: z.string().trim().min(1).max(1000),
+  parentCommentId: z.string().optional(),
 });
 
   export const reportCreateSchema = z.object({

@@ -37,14 +37,14 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="max-w-sm mx-auto">
-      <h1 className="text-2xl font-semibold text-indigo-950 mb-1">Forgot password</h1>
-      <p className="text-sm text-neutral-500 mb-6">
+      <h1 className="font-display text-3xl text-ink mb-1">Forgot password</h1>
+      <p className="text-sm text-ink/60 mb-6">
         Enter your account email and we'll generate a reset link.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
-          <span className="block text-sm font-medium text-neutral-800 mb-1">Email</span>
+          <span className="block text-sm font-medium text-ink/80 mb-1">Email</span>
           <input
             required
             type="email"
@@ -55,15 +55,15 @@ export default function ForgotPasswordPage() {
           />
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {message && <p className="text-sm text-emerald-600">{message}</p>}
+        {error && <p className="text-sm text-pen-red">{error}</p>}
+        {message && <p className="text-sm text-moss">{message}</p>}
 
         {resetLink && (
-          <div className="text-xs bg-amber-50 border border-amber-200 rounded-md p-3 break-all">
-            <p className="font-medium text-amber-800 mb-1">
+          <div className="text-xs bg-marker/10 border border-marker/30 rounded-md p-3 break-all">
+            <p className="font-medium text-marker-dark mb-1">
               Dev mode — no email is sent. Use this link:
             </p>
-            <Link href={resetLink} className="text-indigo-700 hover:underline">
+            <Link href={resetLink} className="text-marker-dark hover:underline">
               {resetLink}
             </Link>
           </div>
@@ -72,14 +72,14 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-indigo-600 text-white py-2 font-medium hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full rounded-md bg-ink text-paper py-2.5 font-medium hover:bg-ink/90 transition disabled:opacity-50"
         >
           {loading ? "Sending…" : "Send reset link"}
         </button>
       </form>
 
-      <p className="text-sm text-neutral-500 mt-4">
-        <Link href="/login" className="text-indigo-700 hover:underline">
+      <p className="text-sm text-ink/60 mt-4">
+        <Link href="/login" className="text-marker-dark hover:underline">
           Back to login
         </Link>
       </p>

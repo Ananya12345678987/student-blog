@@ -4,22 +4,22 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function LikeButton({
+export default function LikeIconButton({
   postId,
-  initialCount,
   initialLiked,
 }: {
   postId: string;
-  initialCount: number;
   initialLiked: boolean;
 }) {
   const { data: session } = useSession();
   const router = useRouter();
-  const [count, setCount] = useState(initialCount);
   const [liked, setLiked] = useState(initialLiked);
   const [busy, setBusy] = useState(false);
 
-  async function handleClick() {
+  async function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!session?.user) {
       router.push("/login");
       return;
@@ -28,7 +28,6 @@ export default function LikeButton({
 
     setBusy(true);
     setLiked((l) => !l);
-    setCount((c) => (liked ? c - 1 : c + 1));
 
     const res = await fetch(`/api/posts/${postId}/like`, { method: "POST" });
     setBusy(false);
@@ -36,10 +35,8 @@ export default function LikeButton({
     if (res.ok) {
       const data = await res.json();
       setLiked(data.liked);
-      setCount(data.count);
     } else {
       setLiked((l) => !l);
-      setCount((c) => (liked ? c + 1 : c - 1));
     }
   }
 
@@ -48,14 +45,12 @@ export default function LikeButton({
       type="button"
       onClick={handleClick}
       disabled={busy}
-      className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border transition ${
-        liked
-          ? "bg-pen-red/5 border-pen-red/30 text-pen-red"
-          : "border-rule text-ink/60 hover:border-ink/30"
-      }`}
-    >
-      <span>{liked ? "♥" : "♡"}</span>
-      <span>{count}</span>
+      aria-label={liked ? "Unlike" : "Like"}
+      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-paper/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-paper transition"
+>
+      <span className={liked ? "text-pen-red" : "text-ink/60"}>
+        {liked ? "♥" : "♡"}
+      </span>
     </button>
   );
 }

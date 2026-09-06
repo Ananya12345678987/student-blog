@@ -34,7 +34,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     );
   }
 
-  await connectDB();
+    await connectDB();
   // content is stored as plain text (maxlength enforced in schema) and
   // rendered as plain text on the frontend — never dangerouslySetInnerHTML
   // — so there's no HTML/XSS injection path through comments at all.
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     post: id,
     author: (session.user as any).id,
     content: parsed.data.content,
+    ...(parsed.data.parentCommentId ? { parentComment: parsed.data.parentCommentId } : {}),
   });
 
   const post = await Post.findById(id).select("author");
@@ -52,6 +53,20 @@ export async function POST(req: NextRequest, { params }: Params) {
       type: "COMMENT",
       postId: id,
     });
+  }
+
+  // Also notify whoever wrote the comment being replied to, if different
+  // from the post owner (who was already notified above).
+  if (parsed.data.parentCommentId) {
+    const parent = await Comment.findById(parsed.data.parentCommentId).select("author");
+    if (parent && parent.author.toString() !== (session.user as any).id) {
+      await createNotification({
+        recipientId: parent.author.toString(),
+        actorId: (session.user as any).id,
+        type: "COMMENT",
+        postId: id,
+      });
+    }
   }
 
   return NextResponse.json(comment, { status: 201 });

@@ -19,7 +19,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await connectDB();
+    await connectDB();
+
+  // Defense in depth: the UI already hides the Report button on your own
+  // content, but don't rely on that alone — block it server-side too.
+  if (parsed.data.targetType === "POST") {
+    const Post = (await import("@/models/Post")).default;
+    const post = await Post.findById(parsed.data.targetId).select("author");
+    if (post && post.author.toString() === (session.user as any).id) {
+      return NextResponse.json(
+        { error: "You can't report your own post." },
+        { status: 400 }
+      );
+    }
+  } else {
+    const Comment = (await import("@/models/Comment")).default;
+    const comment = await Comment.findById(parsed.data.targetId).select("author");
+    if (comment && comment.author.toString() === (session.user as any).id) {
+      return NextResponse.json(
+        { error: "You can't report your own comment." },
+        { status: 400 }
+      );
+    }
+  }
+
   await Report.create({
     reporter: (session.user as any).id,
     targetType: parsed.data.targetType,

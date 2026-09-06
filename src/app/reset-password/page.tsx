@@ -39,9 +39,9 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <p className="text-sm text-red-600">
+      <p className="text-sm text-pen-red">
         Missing reset token. Request a new link from{" "}
-        <Link href="/forgot-password" className="text-indigo-700 hover:underline">
+        <Link href="/forgot-password" className="text-marker-dark hover:underline">
           here
         </Link>
         .
@@ -51,7 +51,7 @@ function ResetPasswordForm() {
 
   if (done) {
     return (
-      <p className="text-sm text-emerald-600">
+      <p className="text-sm text-moss">
         Password updated. Redirecting to login…
       </p>
     );
@@ -59,12 +59,12 @@ function ResetPasswordForm() {
 
   return (
     <div className="max-w-sm mx-auto">
-      <h1 className="text-2xl font-semibold text-indigo-950 mb-1">Reset password</h1>
-      <p className="text-sm text-neutral-500 mb-6">Choose a new password.</p>
+      <h1 className="font-display text-3xl text-ink mb-1">Reset password</h1>
+      <p className="text-sm text-ink/60 mb-6">Choose a new password.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
-          <span className="block text-sm font-medium text-neutral-800 mb-1">New password</span>
+          <span className="block text-sm font-medium text-ink/80 mb-1">New password</span>
           <input
             required
             type="password"
@@ -75,12 +75,12 @@ function ResetPasswordForm() {
           />
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-pen-red">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-indigo-600 text-white py-2 font-medium hover:bg-indigo-700 disabled:opacity-50"
+          className="w-full rounded-md bg-ink text-paper py-2.5 font-medium hover:bg-ink/90 transition disabled:opacity-50"
         >
           {loading ? "Updating…" : "Update password"}
         </button>

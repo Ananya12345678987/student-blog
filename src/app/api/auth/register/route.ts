@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { registerSchema } from "@/lib/validation";
+import { resend } from "@/lib/resend";
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,8 +42,11 @@ export async function POST(req: NextRequest) {
     // (Argon2id is technically stronger, but bcrypt via bcryptjs needs no
     // native build step, which matters a lot for a fast, free, portable
     // deploy — a reasonable trade-off for this project's scale.)
-    const passwordHash = await bcrypt.hash(password, 12);
+        const passwordHash = await bcrypt.hash(password, 12);
     const avatarSeed = crypto.randomBytes(16).toString("hex");
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
 
    const user = await User.create({
    name,
@@ -50,7 +55,28 @@ export async function POST(req: NextRequest) {
    passwordHash,
    avatarSeed,
    avatarStyle: "identicon",
+   verificationToken: hashedToken,
+   verificationTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
   });
+
+    const origin = req.nextUrl.origin;
+    const verifyLink = `${origin}/verify-email?token=${rawToken}`;
+
+    try {
+      await resend.emails.send({
+        // Resend's free tier default sender — works without verifying your
+        // own domain, good enough for dev/testing.
+        // from: "StudentBlog <onboarding@resend.dev>",
+        from: "StudentBlog <noreply@yourdomain.com>",
+        to: email,
+        subject: "Verify your StudentBlog account",
+        html: `<p>Hi ${name},</p><p>Click below to verify your email:</p><p><a href="${verifyLink}">${verifyLink}</a></p><p>This link expires in 24 hours.</p>`,
+      });
+    } catch (emailErr) {
+      // Don't fail registration just because the email didn't send —
+      // account still exists, they can request a new verification link.
+      console.error("Verification email failed to send:", emailErr);
+    }
 
     return NextResponse.json(
       { id: user._id, username: user.username, name: user.name },

@@ -20,36 +20,36 @@ export const dynamic = "force-dynamic";
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-indigo-950">Your posts</h1>
+                <div className="flex items-center justify-between mb-6 border-b border-rule pb-4">
+        <h1 className="font-display text-3xl text-ink">Your posts</h1>
         <Link
           href="/dashboard/posts/new"
-          className="rounded-md bg-indigo-600 text-white px-3 py-1.5 text-sm hover:bg-indigo-700"
+          className="rounded-md bg-ink text-paper px-3 py-1.5 text-sm hover:bg-ink/90 transition"
         >
           New post
         </Link>
       </div>
 
       {posts.length === 0 ? (
-        <div className="border border-dashed border-neutral-300 rounded-lg py-16 text-center text-neutral-400">
+        <div className="border border-dashed border-rule rounded-md py-16 text-center text-ink/40">
           You haven't written anything yet.{" "}
-          <Link href="/dashboard/posts/new" className="text-indigo-700 hover:underline">
+          <Link href="/dashboard/posts/new" className="text-marker-dark hover:underline">
             Start your first post
           </Link>
           .
         </div>
       ) : (
-        <ul className="divide-y divide-neutral-200">
+        <ul className="divide-y divide-rule">
           {posts.map((post: any) => (
             <li key={post._id} className="py-4 flex items-center justify-between">
               <div>
-                <p className="font-medium text-neutral-900">{post.title}</p>
-                <p className="text-xs text-neutral-400 mt-0.5">
+                <p className="font-medium text-ink">{post.title}</p>
+                <p className="text-xs text-ink/40 mt-0.5">
                   <span
                     className={
                       post.status === "PUBLISHED"
-                        ? "text-emerald-600"
-                        : "text-amber-600"
+                        ? "text-moss"
+                        : "text-marker-dark"
                     }
                   >
                     {post.status}
@@ -57,10 +57,18 @@ export const dynamic = "force-dynamic";
                   · Updated {new Date(post.updatedAt).toLocaleDateString()}
                 </p>
               </div>
-                            <div className="flex items-center gap-3">
+                                                  <div className="flex items-center gap-3">
+                {post.status === "PUBLISHED" && (
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="text-sm text-ink/60 hover:text-ink transition"
+                  >
+                    View
+                  </Link>
+                )}
                 <Link
                   href={`/dashboard/posts/${post._id}/edit`}
-                  className="text-sm text-indigo-700 hover:underline"
+                  className="text-sm text-marker-dark hover:underline"
                 >
                   Edit
                 </Link>
@@ -68,7 +76,7 @@ export const dynamic = "force-dynamic";
                   postId={post._id.toString()}
                   postTitle={post.title}
                 />
-              </div>
+              </div>      
             </li>
           ))}
         </ul>

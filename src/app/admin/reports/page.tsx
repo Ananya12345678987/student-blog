@@ -20,20 +20,20 @@ export default async function AdminReportsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-indigo-950 mb-6">Reports</h1>
+                <h1 className="font-display text-3xl text-ink mb-6 border-b border-rule pb-4">Reports</h1>
 
       {reports.length === 0 ? (
-        <p className="text-neutral-400">No reports yet.</p>
+        <p className="text-ink/40">No reports yet.</p>
       ) : (
-        <ul className="divide-y divide-neutral-200">
+        <ul className="divide-y divide-rule">
           {reports.map((r: any) => (
             <li key={r._id} className="py-4">
               <p className="text-sm">
-                <span className="font-medium">{r.targetType}</span> reported by{" "}
+                <span className="font-medium text-ink">{r.targetType}</span> reported by{" "}
                 {r.reporter?.name ?? "Unknown"} (@{r.reporter?.username ?? "?"})
               </p>
-              <p className="text-sm text-neutral-600 mt-1">"{r.reason}"</p>
-              <p className="text-xs text-neutral-400 mt-1">
+              <p className="text-sm text-ink/70 mt-1">"{r.reason}"</p>
+              <p className="text-xs text-ink/40 mt-1">
                 Target ID: {r.targetId.toString()} ·{" "}
                 {new Date(r.createdAt).toLocaleDateString()} · {r.status}
               </p>

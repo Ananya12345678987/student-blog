@@ -10,6 +10,8 @@ import ReportButton from "@/components/ReportButton";
 import { auth } from "@/auth";
 import { connectDB as connectDB2 } from "@/lib/db";
 import User from "@/models/User";
+import { optimizedImageUrl } from "@/lib/cloudinaryUrl";
+
 
 export const dynamic = "force-dynamic";
 
@@ -58,11 +60,9 @@ async function getRelatedPosts(category: string, excludeId: string) {
 async function getPost(slug: string) {
   await connectDB();
   const post = await Post.findOneAndUpdate(
-    { slug, status: "PUBLISHED" }, // the status filter here is what prevents a
-    // guessed/leaked slug from exposing someone's unpublished draft
+    { slug, status: "PUBLISHED" },
     { $inc: { views: 1 } },
     { returnDocument: "after" }
-
   )
     .populate("author", "name username college")
     .lean();
@@ -75,15 +75,15 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   if (!post) notFound();
 
   const wordCount = post.content.trim().split(/\s+/).length;
-  const readTime = Math.max(1, Math.round(wordCount / 200)); // ~200 wpm average
+  const readTime = Math.max(1, Math.round(wordCount / 200));
 
-    const session = await auth();
+  const session = await auth();
   const currentUserId = (session?.user as any)?.id;
   const initiallyLiked = currentUserId
     ? (post.likes ?? []).some((id: string) => id === currentUserId)
     : false;
 
-    let initiallyBookmarked = false;
+  let initiallyBookmarked = false;
   if (currentUserId) {
     await connectDB2();
     const currentUser = await User.findById(currentUserId).select("bookmarks").lean();
@@ -94,64 +94,73 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   const relatedPosts = await getRelatedPosts(post.category, post._id);
 
-
   return (
     <article>
-      <p className="text-sm text-indigo-600 font-medium">{post.category}</p>
-            <h1 className="text-3xl font-semibold text-neutral-900 mt-1">{post.title}</h1>
+      <p className="text-sm text-marker-dark font-medium flex items-center gap-1.5">
+        <span className="inline-block w-1.5 h-1.5 rounded-full bg-marker" />
+        {post.category}
+      </p>
+      <h1 className="font-display text-4xl text-ink mt-2 leading-tight">{post.title}</h1>
 
-      {post.coverImage && (
+            {post.coverImage && (
         <img
-          src={post.coverImage}
+          src={optimizedImageUrl(post.coverImage, { width: 1200 })}
           alt=""
-          className="w-full max-h-96 object-cover rounded-lg mt-4"
+          className="w-full max-h-96 object-cover rounded-md mt-5"
         />
       )}
-      <p className="text-sm text-neutral-400 mt-2">
-  <Link href={`/profile/${post.author?.username}`} className="hover:text-indigo-700 hover:underline">
-    {post.author?.name}
-  </Link>{" "}
-    {post.author?.college ? `· ${post.author.college}` : ""} ·{" "}
-  {new Date(post.publishedAt).toLocaleDateString()} · {readTime} min read
-</p> 
 
-      <div className="mt-6">
+      <p className="text-sm text-ink/50 mt-4">
+        <Link href={`/profile/${post.author?.username}`} className="hover:text-ink transition">
+          {post.author?.name}
+        </Link>{" "}
+        {post.author?.college ? `· ${post.author.college}` : ""} ·{" "}
+        {new Date(post.publishedAt).toLocaleDateString()} · {readTime} min read
+      </p>
+
+      <div className="mt-8 prose">
         <MarkdownContent content={post.content} />
       </div>
 
-            {post.tags?.length > 0 && (
-        <div className="flex gap-2 mt-8">
+           {post.tags?.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-8">
           {post.tags.map((tag: string) => (
-            <span key={tag} className="text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded-full">
+            <Link
+              key={tag}
+              href={`/tag/${encodeURIComponent(tag)}`}
+              className="text-xs border border-rule text-ink/60 px-2 py-1 rounded-md hover:border-marker hover:text-marker-dark transition"
+            >
               #{tag}
-            </span>
+            </Link>
           ))}
         </div>
       )}
 
-        <div className="mt-6 flex items-center gap-3">
+            <div className="mt-6 flex items-center gap-3">
         <LikeButton
           postId={post._id}
           initialCount={(post.likes ?? []).length}
           initialLiked={initiallyLiked}
         />
         <BookmarkButton postId={post._id} initialBookmarked={initiallyBookmarked} />
-        <ReportButton targetType="POST" targetId={post._id} />
+        {currentUserId !== post.author?._id && (
+          <ReportButton targetType="POST" targetId={post._id} />
+        )}
       </div>
 
-      <hr className="my-8 border-neutral-200" />
+      <hr className="my-8 border-rule" />
 
-            {relatedPosts.length > 0 && (
+      {relatedPosts.length > 0 && (
         <div className="mb-10">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Related posts</h2>
-          <ul className="space-y-4">
-            {relatedPosts.map((rp: any) => (
-              <li key={rp._id}>
-                <Link href={`/blog/${rp.slug}`} className="group">
-                  <p className="font-medium text-neutral-900 group-hover:text-indigo-700">
+          <h2 className="font-display text-xl text-ink mb-4">Related posts</h2>
+          <ul>
+            {relatedPosts.map((rp: any, i: number) => (
+              <li key={rp._id} className={i > 0 ? "border-t border-rule" : ""}>
+                <Link href={`/blog/${rp.slug}`} className="group block py-3">
+                  <p className="font-medium text-ink group-hover:text-marker-dark transition">
                     {rp.title}
                   </p>
-                  {rp.excerpt && <p className="text-sm text-neutral-500">{rp.excerpt}</p>}
+                  {rp.excerpt && <p className="text-sm text-ink/50">{rp.excerpt}</p>}
                 </Link>
               </li>
             ))}

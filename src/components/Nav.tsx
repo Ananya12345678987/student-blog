@@ -12,7 +12,7 @@ export default function Nav() {
 
   return (
     <header className="border-b border-rule bg-paper">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link
           href="/"
           className="font-display text-2xl text-ink"

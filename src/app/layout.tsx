@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-paper text-ink font-body">
         <Providers>
           <Nav />
-                        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">{children}</main>
+                          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
         </Providers>
       </body>
     </html>

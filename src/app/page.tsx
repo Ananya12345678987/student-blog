@@ -168,8 +168,8 @@ export default async function HomePage({
           )}
         </div>
       ) : (
-                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {posts.map((post: any) => (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-10"> 
+        {posts.map((post: any) => (
             <li key={post._id} className="rounded-lg overflow-hidden bg-paper shadow-sm hover:shadow-md transition-shadow">
               <Link href={`/blog/${post.slug}`} className="group block">
                 <div className="relative">

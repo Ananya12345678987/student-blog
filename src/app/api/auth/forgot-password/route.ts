@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { forgotPasswordSchema } from "@/lib/validation";
+import { resend } from "@/lib/resend";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const rawToken = crypto.randomBytes(32).toString("hex");
+       const rawToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
 
     user.resetToken = hashedToken;
@@ -41,14 +42,24 @@ export async function POST(req: NextRequest) {
     const origin = req.nextUrl.origin;
     const resetLink = `${origin}/reset-password?token=${rawToken}`;
 
-    // DEV-ONLY: returning the link directly in the API response so you can
-    // test the flow without an email service. Before real deployment,
-    // replace this with actually sending `resetLink` via email (e.g.
-    // Resend) and remove `resetLink` from the JSON response.
+    // The reset link is only ever sent by email — never returned in the
+    // API response. Returning it here would let anyone who can see this
+    // response reset any account's password without proving they own the
+    // inbox, which defeats the entire point of email-based reset.
+    try {
+      await resend.emails.send({
+        from: "StudentBlog <onboarding@resend.dev>",
+        to: parsed.data.email,
+        subject: "Reset your StudentBlog password",
+        html: `<p>Hi ${user.name},</p><p>Click below to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p><p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
+      });
+    } catch (emailErr) {
+      console.error("Password reset email failed to send:", emailErr);
+    }
+
     return NextResponse.json({
       message: "If that email is registered, a reset link has been generated.",
-      resetLink,
-    });
+    }); 
   } catch (err) {
     console.error("Forgot password error:", err);
     return NextResponse.json(

@@ -18,10 +18,10 @@ export async function POST(_req: NextRequest, { params }: Params) {
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const userId = (session.user as any).id;
-  const alreadyLiked = post.likes.some((l) => l.toString() === userId);
+    const alreadyLiked = post.likes.some((l: any) => l.toString() === userId);
 
-    if (alreadyLiked) {
-    post.likes = post.likes.filter((l) => l.toString() !== userId);
+  if (alreadyLiked) {
+    post.likes = post.likes.filter((l: any) => l.toString() !== userId);
   } else {
     post.likes.push(userId);
     await createNotification({

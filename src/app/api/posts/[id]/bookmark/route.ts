@@ -19,10 +19,10 @@ export async function POST(_req: NextRequest, { params }: Params) {
   const user = await User.findById(userId);
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  const alreadySaved = user.bookmarks.some((b) => b.toString() === id);
+    const alreadySaved = user.bookmarks.some((b: any) => b.toString() === id);
 
-   if (alreadySaved) {
-    user.bookmarks = user.bookmarks.filter((b) => b.toString() !== id);
+  if (alreadySaved) {
+    user.bookmarks = user.bookmarks.filter((b: any) => b.toString() !== id);
   } else {
     user.bookmarks.push(id as any);
     const post = await Post.findById(id).select("author");

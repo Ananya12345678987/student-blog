@@ -6,8 +6,7 @@ import Link from "next/link";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [resetLink, setResetLink] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -15,7 +14,6 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError(null);
     setMessage(null);
-    setResetLink(null);
 
     const res = await fetch("/api/auth/forgot-password", {
       method: "POST",
@@ -32,8 +30,9 @@ export default function ForgotPasswordPage() {
     }
 
     setMessage(data.message);
-    if (data.resetLink) setResetLink(data.resetLink);
   }
+
+   
 
   return (
     <div className="max-w-sm mx-auto">
@@ -55,19 +54,8 @@ export default function ForgotPasswordPage() {
           />
         </label>
 
-        {error && <p className="text-sm text-pen-red">{error}</p>}
+                {error && <p className="text-sm text-pen-red">{error}</p>}
         {message && <p className="text-sm text-moss">{message}</p>}
-
-        {resetLink && (
-          <div className="text-xs bg-marker/10 border border-marker/30 rounded-md p-3 break-all">
-            <p className="font-medium text-marker-dark mb-1">
-              Dev mode — no email is sent. Use this link:
-            </p>
-            <Link href={resetLink} className="text-marker-dark hover:underline">
-              {resetLink}
-            </Link>
-          </div>
-        )}
 
         <button
           type="submit"

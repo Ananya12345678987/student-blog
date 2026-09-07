@@ -29,13 +29,13 @@ export async function POST(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const alreadyFollowing = currentUser.following.some(
-    (id) => id.toString() === targetUser._id.toString()
+    const alreadyFollowing = currentUser.following.some(
+    (id: any) => id.toString() === targetUser._id.toString()
   );
 
   if (alreadyFollowing) {
     currentUser.following = currentUser.following.filter(
-      (id) => id.toString() !== targetUser._id.toString()
+      (id: any) => id.toString() !== targetUser._id.toString()
     );
   } else {
     currentUser.following.push(targetUser._id);

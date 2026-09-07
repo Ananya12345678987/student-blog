@@ -31,11 +31,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // .select('+passwordHash') is required because the User schema
         // excludes passwordHash by default (see models/User.ts).
+        const matchingUsers = await User.find({ email: parsed.data.email }).select("+passwordHash");
+        console.log("LOGIN DEBUG — accounts found with this email:", matchingUsers.length);
+        matchingUsers.forEach((u, i) => {
+          console.log(`LOGIN DEBUG — account #${i + 1} id:`, u._id.toString(), "hash:", u.passwordHash);
+        });
+
         const user = await User.findOne({ email: parsed.data.email }).select("+passwordHash");
         if (!user) return null; // don't reveal "no such user" vs "wrong password"
 
         const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
-        if (!valid) return null;
+        console.log("LOGIN DEBUG — typed password valid?", valid);
+        if (!valid) return null; 
 
         return {
           id: user._id.toString(),

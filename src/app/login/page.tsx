@@ -74,11 +74,7 @@ function LoginForm() {
           </div>
         </label>
 
-        <p className="text-right">
-          <Link href="/forgot-password" className="text-xs text-marker-dark hover:underline">
-            Forgot password?
-          </Link>
-        </p>
+        
 
         {error && <p className="text-sm text-pen-red">{error}</p>}
 
